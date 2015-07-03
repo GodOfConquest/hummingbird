@@ -3,7 +3,8 @@ module Onebox
     class HummingbirdOnebox
       include Engine
 
-      matches_regexp /https?:\/\/(?:www\.)?hummingbird\.me\/(?<type>anime|manga)\/(?<slug>.+)/
+      # a|m are short links for anime|manga
+      matches_regexp /https?:\/\/(?:www\.)?hummingbird\.me\/(?<type>anime|manga|a|m)\/(?<slug>.+)/
 
       def to_html
         return "<a href=\"#{@url}\">#{@url}</a>" if media.nil?
@@ -17,7 +18,7 @@ module Onebox
               </div>
             </div>
             <div class="onebox-body media-embed">
-              <img src="#{media.poster_image_thumb}" class="thumbnail">
+              <img src="#{media.poster_image.url(:large)}" class="thumbnail">
               <h3><a href="#{@url}" target="_blank">#{media.canonical_title}</a></h3>
               <h4>#{media.genres.map {|x| x.name }.sort * ", "}</h4>
               #{media.synopsis[0..199]}...
@@ -30,6 +31,8 @@ module Onebox
       private
 
       def type
+        return 'anime' if @@matcher.match(@url)["type"] == 'a'
+        return 'manga' if @@matcher.match(@url)["type"] == 'm'
         @@matcher.match(@url)["type"]
       end
 
