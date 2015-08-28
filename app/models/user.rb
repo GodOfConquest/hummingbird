@@ -45,7 +45,6 @@
 #  authentication_token        :string(255)
 #  avatar_processing           :boolean
 #  subscribed_to_newsletter    :boolean          default(TRUE)
-#  mal_import_in_progress      :boolean
 #  waifu                       :string(255)
 #  location                    :string(255)
 #  website                     :string(255)
@@ -63,6 +62,9 @@
 #  pro_membership_plan_id      :integer
 #  stripe_customer_id          :string(255)
 #  about_formatted             :text
+#  import_status               :integer
+#  import_from                 :string(255)
+#  import_error                :string(255)
 #
 
 class User < ActiveRecord::Base
@@ -175,7 +177,6 @@ class User < ActiveRecord::Base
     content_type: ["image/jpg", "image/jpeg", "image/png", "image/gif"]
   }
 
-  has_many :watchlists
   has_many :library_entries, dependent: :destroy
   has_many :manga_library_entries, dependent: :destroy
   has_many :reviews
@@ -213,6 +214,8 @@ class User < ActiveRecord::Base
 
   validates :title_language_preference, inclusion: {in: %w[canonical english romanized]}
 
+  enum import_status: {queued: 1, running: 2, complete: 3, error: 4}
+
   def to_s
     name
   end
@@ -240,7 +243,7 @@ class User < ActiveRecord::Base
      "hello@vevix.net", # Vevix
      "jimm4a1@hotmail.com", #Jim
      "jojovonjo@yahoo.com", #JoJo
-     "synthtech@outlook.com" #Synthtech 
+     "synthtech@outlook.com" #Synthtech
     ].include? email
   end
 
@@ -316,7 +319,7 @@ class User < ActiveRecord::Base
     user.confirm!
     return user
   end
-  
+
   # Set this user's facebook_id to the passed in `uid`.
   #
   # Returns nothing.
@@ -343,15 +346,18 @@ class User < ActiveRecord::Base
   # Return the top 5 genres the user has completed, along with
   # the number of anime watched that contain each of those genres.
   def top_genres
-    freqs = library_entries.where(status: "Completed")
-                           .where(private: false)
-                           .joins(:genres)
-                           .group('genres.id')
-                           .select('COUNT(*) as count, genres.id as genre_id')
-                           .order('count DESC')
-                           .limit(5).each_with_object({}) do |x, obj|
-                             obj[x.genre_id] = x.count.to_f
-                           end
+    freqs = nil
+    LibraryEntry.unscoped do
+      freqs = library_entries.where(status: "Completed")
+                             .where(private: false)
+                             .joins(:genres)
+                             .group('genres.id')
+                             .select('COUNT(*) as count, genres.id as genre_id')
+                             .order('count DESC')
+                             .limit(5).each_with_object({}) do |x, obj|
+                               obj[x.genre_id] = x.count.to_f
+                             end
+    end
 
     result = []
     Genre.where(id: freqs.keys).each do |genre|
@@ -363,12 +369,15 @@ class User < ActiveRecord::Base
 
   # How many minutes the user has spent watching anime.
   def recompute_life_spent_on_anime!
-    time_spent = self.library_entries.joins(:anime).select('
-      COALESCE(anime.episode_length, 0) * (
-        COALESCE(episodes_watched, 0)
-        + COALESCE(anime.episode_count, 0) * COALESCE(rewatch_count, 0)
-      ) AS mins
-    ').map {|x| x.mins }.sum
+    time_spent = nil
+    LibraryEntry.unscoped do
+      time_spent = self.library_entries.joins(:anime).select('
+        COALESCE(anime.episode_length, 0) * (
+          COALESCE(episodes_watched, 0)
+          + COALESCE(anime.episode_count, 0) * COALESCE(rewatch_count, 0)
+        ) AS mins
+      ').map {|x| x.mins }.sum
+    end
     self.update_attributes life_spent_on_anime: time_spent
   end
 
@@ -382,11 +391,6 @@ class User < ActiveRecord::Base
 
   def followers_count
     followers_count_hack
-  end
-
-  def compute_watchlist_hash
-    watchlists = self.watchlists.order(:id).map {|x| [x.id, x.status, x.rating] }
-    Digest::MD5.hexdigest( watchlists.inspect )
   end
 
   before_save do

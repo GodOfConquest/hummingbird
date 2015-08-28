@@ -31,7 +31,7 @@ export default Ember.Controller.extend({
   showExtraLikers: Ember.computed.gt('extraLikers', 0),
 
   mediaRoute: function() {
-    return this.get('model.media.constructor.typeKey');
+    return this.get('model.media.constructor.modelName');
   }.property('model.media'),
 
   displaySubstories: function () {
@@ -85,14 +85,18 @@ export default Ember.Controller.extend({
     },
 
     deleteStory: function() {
-      this.get('model').destroyRecord();
+      if (confirm('Are you sure you want to delete this post?')) {
+        this.get('model').destroyRecord();
+      }
     },
 
     deleteSubstory: function(substory) {
-      substory.destroyRecord().then(() => {
-        this.get('substories').removeObject(substory);
-        this.decrementProperty('model.substoryCount');
-      });
+      if (confirm('Are you sure you want to delete this post?')) {
+        substory.destroyRecord().then(() => {
+          this.get('substories').removeObject(substory);
+          this.decrementProperty('model.substoryCount');
+        });
+      }
     },
 
     toggleFullPost: function() {

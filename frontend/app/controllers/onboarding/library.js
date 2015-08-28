@@ -85,15 +85,15 @@ export default Ember.Controller.extend({
       });
     },
 
-    importLibrary: function(){
-      var self = this;
-      ajax({
-        url: '/settings/import/myanimelist',
-        type: 'POST'
-      }).then(function() {
-        self.set('importFromMal', true);
-        Ember.run.later(function(){
-          self.transitionToRoute('onboarding.finish');
+    pickMalFile: function() {
+      Ember.$('#mal-file').click();
+    },
+
+    importMal: function(file) {
+      let user = this.get('currentUser.content.content');
+      user.importList('myanimelist', file).then(() => {
+        Ember.run.later(() => {
+          this.transitionToRoute('onboarding.finish');
         }, 1000);
       });
     },
@@ -109,7 +109,7 @@ export default Ember.Controller.extend({
 
       // Anime and Manga library entries are using
       // different models in ember data!
-      if(media.constructor.typeKey === 'anime') {
+      if(media.constructor.modelName === 'anime') {
         libraryEntry = this.store.createRecord('LibraryEntry', {
           anime: media,
           status: "Completed",
