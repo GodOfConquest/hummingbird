@@ -1,0 +1,22 @@
+.giftbox {
+  position: fixed;
+  bottom: 0;
+  left: -30px;
+  width: 150px;
+  z-index: 9;
+  padding-bottom: 15px;
+  transition: .2s ease-in;
+  .PresentBox {
+    padding-bottom: 15px;
+  }
+  .PresentBoxShadow {
+    opacity: .07;
+  }
+  .visually-hidden { 
+    position: absolute; 
+    overflow: hidden; 
+    clip: rect(0 0 0 0); 
+    height: 1px; width: 1px; 
+    margin: -1px; padding: 0; border: 0; 
+  }
+}

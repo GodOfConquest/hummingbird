@@ -2,6 +2,10 @@
 
 [![Build Status](https://secure.travis-ci.org/hummingbird-me/hummingbird.png?branch=master)](http://travis-ci.org/hummingbird-me/hummingbird) [![Code Climate](https://codeclimate.com/github/hummingbird-me/hummingbird.png)](https://codeclimate.com/github/hummingbird-me/hummingbird) [![Coverage](https://codeclimate.com/github/hummingbird-me/hummingbird/coverage.png)](https://codeclimate.com/github/hummingbird-me/hummingbird)
 
+### Important Notice
+
+The `master` branch is now frozen and work is focussed on the [`the-future` branch](https://github.com/hummingbird-me/hummingbird/tree/the-future). Besides bugfixes, there won't be any critical changes in master anymore.
+
 [![Hummingbird is now Open Source](http://hummingbird-forum.s3.amazonaws.com/86407dbb64dbecfee0cbd74b759a4b33f70657b74c29.jpg)](http://forums.hummingbird.me/t/hummingbird-is-now-open-source/9870)
 
 ### What is Hummingbird?
@@ -30,7 +34,7 @@ Please don't use Github issues for feature requests, instead create a topic in t
 
 ### License
 
-Copyright 2015 Hummingbird Media, Inc.
+Copyright 2016 Hummingbird Media, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,4 +47,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

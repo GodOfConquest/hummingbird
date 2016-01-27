@@ -157,9 +157,9 @@ class Anime < ActiveRecord::Base
 
     case preference
     when 'canonical'
-      english_canonical? ? alt_title : title
+      english_canonical && alt_title.present? ? alt_title : title
     when 'english'
-      alt_title || title
+      alt_title.present? ? alt_title : title
     else
       title
     end
@@ -174,9 +174,9 @@ class Anime < ActiveRecord::Base
 
     case preference
     when 'canonical'
-      english_canonical? ? title : alt_title
+      english_canonical && alt_title.present? ? title : alt_title
     when 'english'
-      title || alt_title
+      alt_title.present? ? title : alt_title
     else
       alt_title
     end
